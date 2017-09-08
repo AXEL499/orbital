@@ -18,9 +18,9 @@ app.get("/", function(req, res){
 });
 
 
-const hostname = process.env.IP || '127.0.0.1';
+//const hostname = process.env.IP || '127.0.0.1';
 const port = process.env.PORT || 3000;
 
-app.listen(port, hostname, function(){
+app.listen(port, function(){
     console.log("server started");
 });
