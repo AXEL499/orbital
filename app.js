@@ -18,8 +18,8 @@ app.get("/", function(req, res){
 });
 
 
-const hostname = '127.0.0.1';
-const port = 3000;
+const hostname = process.env.IP || '127.0.0.1';
+const port = process.env.PORT || 3000;
 
 app.listen(port, hostname, function(){
     console.log("server started");
