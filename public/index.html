@@ -1,41 +1,39 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>BabylonJS first app</title>	
+	<title>Orbital</title>	
+	<!-- USE MINIFIED FILES TO SAVE ON LOADING -->
+	
+	<!-- should probably serve the cdn instead of local script to shift bandwidth from the server to the client (AKA use this v instead of linking to scripts) -->
 	<!--<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/babylonjs/3.0.1-beta/babylon.max.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/babylonjs/3.0.1-beta/babylon.gui.js"></script>-->
 	
-	
-	
-	<script type="text/javascript" src="babylon.custom.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/babylonjs/3.0.1-beta/babylon.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/babylonjs/3.0.1-beta/babylon.gui.min.js"></script>
 	<script type="text/javascript" src="game.js"></script>
-	<!--<script type="text/javascript" src="babylon.max.js"></script>
-	<script type="text/javascript" src="babylon.gui.js"></script>-->
 	
-
 	<style type="text/css">
 	body{
+		width: 100%;
+		height: 100%;
 		margin: 0px;
 		padding: 0px;
 		border: 0px;
+		overflow:hidden;
 	}
-	#canvas{
+	/*#canvas{
 		width: 100%;
 		height: 100%;
 		margin: 0px;
 		border: 0px;
 		padding: 0px;
-	}
+	}*/
+	
 
 	</style>
 </head>
 <body>
 	<canvas id="canvas"></canvas>
-
-
-	
-
-	
 
 
 </body>

@@ -1,6 +1,8 @@
 
 window.addEventListener("DOMContentLoaded", function () {
     var canvas = document.getElementById("canvas");
+    canvas.width= window.innerWidth;
+    canvas.height=window.innerHeight;
 
     var engine = new BABYLON.Engine(canvas, true);
 
@@ -37,19 +39,19 @@ window.addEventListener("DOMContentLoaded", function () {
         // 		});
         // 	});
 
-        var plane = BABYLON.MeshBuilder.CreatePlane("plane", { width: 60, height: 40 }, scene);
+        var plane = BABYLON.MeshBuilder.CreatePlane("plane", { width: 52, height: 29 }, scene);
         plane.material = new BABYLON.StandardMaterial("planeMaterial", scene);
         plane.material.diffuseTexture = new BABYLON.Texture("http://i.imgur.com/vDhYRDs.jpg", scene);
 
         //textures/materials
         var material = new BABYLON.StandardMaterial("material1", scene);
-        material.diffuseTexture = new BABYLON.Texture("Cobble.png", scene);//"http://i.imgur.com/adqpEOZ.jpg"
+        material.diffuseTexture = new BABYLON.Texture("https://s26.postimg.org/jah8pebix/moon.jpg", scene);
 
         var material2 = new BABYLON.StandardMaterial("material2", scene);
-        material2.diffuseTexture = new BABYLON.Texture("Dirt.png", scene);//"http://i.imgur.com/LOOfsiP.jpg"
+        material2.diffuseTexture = new BABYLON.Texture("https://s26.postimg.org/6gj6w1y3d/Dirt.png", scene);
 
         var material3 = new BABYLON.StandardMaterial("material3", scene);
-        material3.diffuseTexture = new BABYLON.Texture("Earth.jpg", scene);
+        material3.diffuseTexture = new BABYLON.Texture("https://s26.postimg.org/ubcduf3rt/Earth.jpg", scene);
 
         //ship/planet/texturing
         var planet = BABYLON.MeshBuilder.CreateSphere("Planet", { diameter: 2, diameterX: 2 }, scene);
@@ -72,15 +74,17 @@ window.addEventListener("DOMContentLoaded", function () {
         var moon = BABYLON.MeshBuilder.CreateSphere("Moon", { diameter: 0.8, diameterX: 0.8 }, scene);
         moon.position = new BABYLON.Vector3(10, 0, 0);
         moon.material = material;
+        moon.rotation = new BABYLON.Vector3(BABYLON.Tools.ToRadians(270), BABYLON.Tools.ToRadians(180), 0);
 
         var ring = BABYLON.MeshBuilder.CreatePlane("ring", { width: 5, height: 5 }, scene);
 
         ringMaterial = new BABYLON.StandardMaterial("ringMaterial", scene);
-        ringMaterial.diffuseTexture = new BABYLON.Texture("Ring2.png", scene);
+        ringMaterial.diffuseTexture = new BABYLON.Texture("https://s26.postimg.org/bt81a6lzt/Ring.png", scene);
         ringMaterial.diffuseTexture.hasAlpha = true;//Have an alpha
         ringMaterial.diffuseColor = new BABYLON.Color3(1, 0, 0);
         ring.material = ringMaterial;
         ring.parent = moon;
+        ring.rotation = new BABYLON.Vector3(BABYLON.Tools.ToRadians(270), BABYLON.Tools.ToRadians(180), 0);
 
         var camera = new BABYLON.FreeCamera("Cam1", new BABYLON.Vector3(0, 0, -30), scene);
 
@@ -131,6 +135,9 @@ window.addEventListener("DOMContentLoaded", function () {
     }));
 
     engine.runRenderLoop(function () {
+        canvas.width= window.innerWidth;
+        canvas.height=window.innerHeight;
+
         var Ship = scene.getMeshByName("Ship");
         var ForwardBlock = scene.getMeshByName("ForwardBlock");
         var Planet = scene.getMeshByName("Planet");
@@ -147,7 +154,6 @@ window.addEventListener("DOMContentLoaded", function () {
             else{
                 player.fuel = 0;
             }
-            
         }
         if (map["a"]) {
             Ship.rotation.z += 0.05;
@@ -199,6 +205,9 @@ window.addEventListener("DOMContentLoaded", function () {
 
             Moon.translate(BABYLON.Vector3.Normalize(moonVelocity), moonVelocity.length() * 0.01666666667 /*(engine.getDeltaTime() / 1000)*/, BABYLON.Space.WORLD);
 
+            Planet.rotate(BABYLON.Axis.Z, 0.04, BABYLON.Space.WORLD);
+            Moon.rotate(BABYLON.Axis.Z, 0.0041, BABYLON.Space.WORLD);
+
         }
 
         fuelLeft.text = String("Fuel: " + player.fuel.toFixed(2));
@@ -219,9 +228,7 @@ window.addEventListener("DOMContentLoaded", function () {
             timeLeft = 60;
         }
 
-        Planet.rotate(BABYLON.Axis.Z, 0.01, BABYLON.Space.WORLD);
-
-        //Ring color
+        
         
         if(distance.length() <= 2.5){
             inRing = true;
@@ -249,6 +256,8 @@ window.addEventListener("DOMContentLoaded", function () {
         // var zoomLevel = (Moon.position.subtract(Ship.position)).length();
         // newVec = newVec.add(new BABYLON.Vector3(0, 0, (-zoomLevel * 3)));
         // cam.position = newVec;
+
+        
 
         scene.render();
     });
