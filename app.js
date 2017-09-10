@@ -4,7 +4,6 @@ var request = require("request");
 var bodyParser = require("body-parser");
 
 //TODO
-//add highscore text
 //make rocket/moon/planet models/textures
 //add sounds
 //add effects (screen shake, rocket thrust)

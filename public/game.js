@@ -20,48 +20,51 @@ window.addEventListener("DOMContentLoaded", function () {
 
     var timeLeft = 60;
 
+    var fuelHighScore = 0;
+    var timeHighScore = 0;
+
     var ringMaterial;
     var ringTimer = 10;
     var inRing = false;
 
+    
+
     var createScene = function () {
         var scene = new BABYLON.Scene(engine);
         engine.enableOfflineSupport = false;
-        scene.clearColor = new BABYLON.Color3.Purple();
+        scene.clearColor = new BABYLON.Color3(0.3, 0.8, 0.8);
 
-        // BABYLON.SceneLoader.ImportMesh("","", "Heart.babylon", scene, 
-        // 	function(meshes){
-        // 		meshes.forEach(function(i){
-        // 			i.position = new BABYLON.Vector3(0, 0, -5);
-        // 			i.rotation = new BABYLON.Vector3(0, BABYLON.Tools.ToRadians(90), 0);
-        // 			i.material = new BABYLON.StandardMaterial("heartMat", scene);
-        // 			i.material.diffuseColor = BABYLON.Color3.Red();
-        // 		});
-        // 	});
-
-        var plane = BABYLON.MeshBuilder.CreatePlane("plane", { width: 52, height: 29 }, scene);
-        plane.material = new BABYLON.StandardMaterial("planeMaterial", scene);
-        plane.material.diffuseTexture = new BABYLON.Texture("http://i.imgur.com/vDhYRDs.jpg", scene);
+        // var plane = BABYLON.MeshBuilder.CreatePlane("plane", { width: 52, height: 29 }, scene);
+        // plane.material = new BABYLON.StandardMaterial("planeMaterial", scene);
+        // plane.material.diffuseTexture = new BABYLON.Texture("http://i.imgur.com/vDhYRDs.jpg", scene);
 
         //textures/materials
         var material = new BABYLON.StandardMaterial("material1", scene);
         material.diffuseTexture = new BABYLON.Texture("https://s26.postimg.org/jah8pebix/moon.jpg", scene);
 
-        var material2 = new BABYLON.StandardMaterial("material2", scene);
-        material2.diffuseTexture = new BABYLON.Texture("https://s26.postimg.org/6gj6w1y3d/Dirt.png", scene);
-
         var material3 = new BABYLON.StandardMaterial("material3", scene);
         material3.diffuseTexture = new BABYLON.Texture("https://s26.postimg.org/ubcduf3rt/Earth.jpg", scene);
 
         //ship/planet/texturing
-        var planet = BABYLON.MeshBuilder.CreateSphere("Planet", { diameter: 2, diameterX: 2 }, scene);
+        var planet = BABYLON.MeshBuilder.CreateSphere("Planet", { diameter: 1, diameterX: 1 }, scene);//diameter 2
         planet.material = material3;
         planet.position = new BABYLON.Vector3(0, 0, 0);
         planet.rotation = new BABYLON.Vector3(BABYLON.Tools.ToRadians(270), BABYLON.Tools.ToRadians(180), 0);
 
-        var ship = BABYLON.Mesh.CreateBox("Ship", 0.5, scene);
-        ship.material = material2;
+        var ship = new BABYLON.Mesh("Ship", scene);
         ship.position = new BABYLON.Vector3(-10, 0, 0);
+
+        BABYLON.SceneLoader.ImportMesh("","", "rocket.babylon", scene, 
+        function(meshes){
+            meshes.forEach(function(i){
+                i.rotation = new BABYLON.Vector3(BABYLON.Tools.ToRadians(270), 0, 0);
+                i.material = new BABYLON.StandardMaterial("heartMat", scene);
+                i.material.diffuseColor = BABYLON.Color3.Random();
+                i.parent = ship;
+                i.scaling = new BABYLON.Vector3(0.15, 0.15,0.15);
+            });
+        });
+        
 
         var forwardBlock = BABYLON.Mesh.CreateBox("ForwardBlock", 1.0, scene);
         var material3 = new BABYLON.StandardMaterial("material3", scene);
@@ -96,6 +99,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
         advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
         
+
         return scene;
     }
 
@@ -122,6 +126,21 @@ window.addEventListener("DOMContentLoaded", function () {
     ringTimerText.left = 0;
     ringTimerText.top = -100;
     advancedTexture.addControl(ringTimerText);   
+
+    var fuelHighScoreText = new BABYLON.GUI.TextBlock();
+    fuelHighScoreText.color = "white";
+    fuelHighScoreText.fontSize = 24;
+    fuelHighScoreText.left = 650;
+    fuelHighScoreText.top = -450;
+    advancedTexture.addControl(fuelHighScoreText);  
+
+    var timeHighScoreText = new BABYLON.GUI.TextBlock();
+    timeHighScoreText.color = "white";
+    timeHighScoreText.fontSize = 24;
+    timeHighScoreText.left = 650;
+    timeHighScoreText.top = -400;
+    advancedTexture.addControl(timeHighScoreText);  
+
 
     var map = {}; //object for multiple key presses
 
@@ -224,8 +243,23 @@ window.addEventListener("DOMContentLoaded", function () {
             Ship.rotation = new BABYLON.Vector3.Zero();
             Moon.position = new BABYLON.Vector3(10, 0, 0);
             moonVelocity = new BABYLON.Vector3(0, 2.451, 0);
+            
+            if(ringTimer <= -10){
+                if(fuelHighScore < player.fuel.toFixed(2)){
+                    fuelHighScore = player.fuel.toFixed(2);
+                    fuelHighScoreText.text = String("Best: " + fuelHighScore);
+                }
+                if(timeHighScore < timeLeft.toFixed(2)){
+                    timeHighScore = timeLeft.toFixed(2);
+                    timeHighScoreText.text = String("Best: " + timeHighScore);
+                }
+                
+                
+            }
             player.fuel = 1000;
             timeLeft = 60;
+            ringTimer = 10;
+            
         }
 
         
