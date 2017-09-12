@@ -34,23 +34,24 @@ window.addEventListener("DOMContentLoaded", function () {
         engine.enableOfflineSupport = false;
         scene.clearColor = new BABYLON.Color3(0.3, 0.8, 0.8);
 
+        var music = new BABYLON.Sound("Music", "test.mp3", scene, null, { loop: true, autoplay: true });
+
+        //starfield
         // var plane = BABYLON.MeshBuilder.CreatePlane("plane", { width: 52, height: 29 }, scene);
         // plane.material = new BABYLON.StandardMaterial("planeMaterial", scene);
         // plane.material.diffuseTexture = new BABYLON.Texture("http://i.imgur.com/vDhYRDs.jpg", scene);
 
         //textures/materials
-        var material = new BABYLON.StandardMaterial("material1", scene);
-        material.diffuseTexture = new BABYLON.Texture("https://s26.postimg.org/jah8pebix/moon.jpg", scene);
-
         var material3 = new BABYLON.StandardMaterial("material3", scene);
         material3.diffuseTexture = new BABYLON.Texture("https://s26.postimg.org/ubcduf3rt/Earth.jpg", scene);
 
         //ship/planet/texturing
-        var planet = BABYLON.MeshBuilder.CreateSphere("Planet", { diameter: 1, diameterX: 1 }, scene);//diameter 2
+        var planet = BABYLON.MeshBuilder.CreateSphere("Planet", { diameter: 2, diameterX: 2 }, scene);//diameter 2
         planet.material = material3;
-        planet.position = new BABYLON.Vector3(0, 0, 0);
+        planet.position = new BABYLON.Vector3.Zero();
         planet.rotation = new BABYLON.Vector3(BABYLON.Tools.ToRadians(270), BABYLON.Tools.ToRadians(180), 0);
 
+        //ship dummy
         var ship = new BABYLON.Mesh("Ship", scene);
         ship.position = new BABYLON.Vector3(-10, 0, 0);
 
@@ -62,22 +63,31 @@ window.addEventListener("DOMContentLoaded", function () {
                 i.material.diffuseColor = BABYLON.Color3.Random();
                 i.parent = ship;
                 i.scaling = new BABYLON.Vector3(0.15, 0.15,0.15);
+                i.convertToFlatShadedMesh();
             });
         });
-        
 
-        var forwardBlock = BABYLON.Mesh.CreateBox("ForwardBlock", 1.0, scene);
-        var material3 = new BABYLON.StandardMaterial("material3", scene);
-        material3.wireframe = true;
-        forwardBlock.material = material3;
+        //moon dummy
+        var moon = new BABYLON.Mesh("Moon", scene);
+        moon.position = new BABYLON.Vector3(10, 0, 0);
 
+        BABYLON.SceneLoader.ImportMesh("","", "moon2.babylon", scene, 
+        function(meshes){
+            meshes.forEach(function(i){
+                i.rotation = new BABYLON.Vector3(BABYLON.Tools.ToRadians(270), 0, 0);
+                i.material = new BABYLON.StandardMaterial("heartMat", scene);
+                i.material.diffuseColor = BABYLON.Color3.Gray();
+                //i.material.ambientColor = new BABYLON.Color3(1, 1, 1);
+                //i.material.emissiveTexture  = new BABYLON.Texture("Checkerboard.jpg", scene);
+                i.convertToFlatShadedMesh();
+                i.parent = moon;
+                i.scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
+            });
+        });
+
+        var forwardBlock = new BABYLON.Mesh("ForwardBlock", scene);
         forwardBlock.parent = ship;
         forwardBlock.translate(new BABYLON.Vector3(0, 1, 0), 5, BABYLON.Space.WORLD);
-
-        var moon = BABYLON.MeshBuilder.CreateSphere("Moon", { diameter: 0.8, diameterX: 0.8 }, scene);
-        moon.position = new BABYLON.Vector3(10, 0, 0);
-        moon.material = material;
-        moon.rotation = new BABYLON.Vector3(BABYLON.Tools.ToRadians(270), BABYLON.Tools.ToRadians(180), 0);
 
         var ring = BABYLON.MeshBuilder.CreatePlane("ring", { width: 5, height: 5 }, scene);
 
@@ -87,7 +97,6 @@ window.addEventListener("DOMContentLoaded", function () {
         ringMaterial.diffuseColor = new BABYLON.Color3(1, 0, 0);
         ring.material = ringMaterial;
         ring.parent = moon;
-        ring.rotation = new BABYLON.Vector3(BABYLON.Tools.ToRadians(270), BABYLON.Tools.ToRadians(180), 0);
 
         var camera = new BABYLON.FreeCamera("Cam1", new BABYLON.Vector3(0, 0, -30), scene);
 
@@ -161,9 +170,10 @@ window.addEventListener("DOMContentLoaded", function () {
         var ForwardBlock = scene.getMeshByName("ForwardBlock");
         var Planet = scene.getMeshByName("Planet");
         var Moon = scene.getMeshByName("Moon");
-
+        var Light = scene.getLightByName("dirLight");
         var speedmodifier = 1;
 
+        //Light.intensity = 2;
         if (map["w"]) {
             if(player.fuel > 0){
                 var newVec = ForwardBlock.absolutePosition.subtract(Ship.position);
@@ -261,9 +271,6 @@ window.addEventListener("DOMContentLoaded", function () {
             ringTimer = 10;
             
         }
-
-        
-        
         if(distance.length() <= 2.5){
             inRing = true;
 
@@ -290,8 +297,6 @@ window.addEventListener("DOMContentLoaded", function () {
         // var zoomLevel = (Moon.position.subtract(Ship.position)).length();
         // newVec = newVec.add(new BABYLON.Vector3(0, 0, (-zoomLevel * 3)));
         // cam.position = newVec;
-
-        
 
         scene.render();
     });

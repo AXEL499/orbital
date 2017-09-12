@@ -4,7 +4,7 @@ var request = require("request");
 var bodyParser = require("body-parser");
 
 //TODO
-//make rocket/moon/planet models/textures
+//~~make rocket/moon/planet models/textures~~
 //add sounds
 //add effects (screen shake, rocket thrust)
 //use github at some point
