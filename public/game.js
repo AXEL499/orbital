@@ -34,7 +34,7 @@ window.addEventListener("DOMContentLoaded", function () {
         engine.enableOfflineSupport = false;
         scene.clearColor = new BABYLON.Color3(0.3, 0.8, 0.8);
 
-        var music = new BABYLON.Sound("Music", "test.mp3", scene, null, { loop: true, autoplay: true });
+        var music = new BABYLON.Sound("Music", "test.ogg", scene, null, { loop: true, autoplay: true });
 
         //starfield
         // var plane = BABYLON.MeshBuilder.CreatePlane("plane", { width: 52, height: 29 }, scene);
