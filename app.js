@@ -5,9 +5,11 @@ var bodyParser = require("body-parser");
 
 //TODO
 //~~make rocket/moon/planet models/textures~~
-//add sounds
+//~~add sounds~~
+//fix emitter stutter
 //add effects (screen shake, rocket thrust)
 //use github at some point
+//refactor
 //add more levels? :D
 //balance
 //make highscores hosted on mongodb

@@ -50,7 +50,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
         //textures/materials
         var material3 = new BABYLON.StandardMaterial("material3", scene);
-        material3.diffuseTexture = new BABYLON.Texture("https://s26.postimg.org/ubcduf3rt/Earth.jpg", scene);
+        material3.diffuseTexture = new BABYLON.Texture("Earth.jpg", scene);
 
         //ship/planet/texturing
         var planet = BABYLON.MeshBuilder.CreateSphere("Planet", { diameter: 2, diameterX: 2 }, scene);//diameter 2
@@ -120,7 +120,7 @@ window.addEventListener("DOMContentLoaded", function () {
         var ring = BABYLON.MeshBuilder.CreatePlane("ring", { width: 5, height: 5 }, scene);
 
         ringMaterial = new BABYLON.StandardMaterial("ringMaterial", scene);
-        ringMaterial.diffuseTexture = new BABYLON.Texture("https://s26.postimg.org/bt81a6lzt/Ring.png", scene);
+        ringMaterial.diffuseTexture = new BABYLON.Texture("Ring.png", scene);
         ringMaterial.diffuseTexture.hasAlpha = true;//Have an alpha
         ringMaterial.diffuseColor = new BABYLON.Color3(1, 0, 0);
         ring.material = ringMaterial;
@@ -193,9 +193,13 @@ window.addEventListener("DOMContentLoaded", function () {
         map[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
     }));
 
+
     engine.runRenderLoop(function () {
-        canvas.width= window.innerWidth;
-        canvas.height=window.innerHeight;
+        // canvas.width= window.innerWidth;
+        // canvas.height=window.innerHeight;
+
+        var deltaTime = engine.getFps() / 1000;
+    
 
         var Ship = scene.getMeshByName("Ship");
         var ForwardBlock = scene.getMeshByName("ForwardBlock");
@@ -241,14 +245,17 @@ window.addEventListener("DOMContentLoaded", function () {
             timeLeft = 0;
         }
 
+    
         for (var i = 0; i < speedmodifier; ++i) {
             //ring timer based on speed modifier
-            ringTimer -= (engine.getDeltaTime() / 1000);    
+            ringTimer -= deltaTime;    
 
             //time ticks down faster if speeding up time
             if(!inRing){
-                timeLeft -= (engine.getDeltaTime() / 1000);                
+                timeLeft -= deltaTime;           
             }
+
+               
 
             //player gravity to planet
             var distance = Planet.position.subtract(Ship.position);
@@ -269,7 +276,7 @@ window.addEventListener("DOMContentLoaded", function () {
             gravForceVec = (BABYLON.Vector3.Normalize(distance)).multiplyByFloats(force, force, force);
             player.velocity.addInPlace(gravForceVec);
 
-            Ship.translate(BABYLON.Vector3.Normalize(player.velocity), player.velocity.length() * 0.01666666667 /*(engine.getDeltaTime() / 1000)*/, BABYLON.Space.WORLD);
+            Ship.translate(BABYLON.Vector3.Normalize(player.velocity), player.velocity.length() * 0.01666666667, BABYLON.Space.WORLD);
 
             //moon gravity calculations
             distance = Planet.position.subtract(Moon.position);
@@ -279,7 +286,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
             moonVelocity.addInPlace(gravForceVec);
 
-            Moon.translate(BABYLON.Vector3.Normalize(moonVelocity), moonVelocity.length() * 0.01666666667 /*(engine.getDeltaTime() / 1000)*/, BABYLON.Space.WORLD);
+            Moon.translate(BABYLON.Vector3.Normalize(moonVelocity), moonVelocity.length() * 0.01666666667, BABYLON.Space.WORLD);
 
             Planet.rotate(BABYLON.Axis.Z, 0.04, BABYLON.Space.WORLD);
             Moon.rotate(BABYLON.Axis.Z, 0.0041, BABYLON.Space.WORLD);
@@ -287,7 +294,7 @@ window.addEventListener("DOMContentLoaded", function () {
         }
 
         fuelLeft.text = String("Fuel: " + player.fuel.toFixed(2));
-        timeLeftText.text = String("Time left: " + timeLeft.toFixed(2));
+        //timeLeftText.text = String("Time left: " + timeLeft.toFixed(2));
 
         //deathcheck
         var screenWidth = 25.5;
