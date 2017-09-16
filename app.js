@@ -6,7 +6,7 @@ var bodyParser = require("body-parser");
 //TODO
 //~~make rocket/moon/planet models/textures~~
 //~~add sounds~~
-//fix emitter stutter
+//fix gravity calculations, gl lol
 //add effects (screen shake, rocket thrust)
 //use github at some point
 //refactor

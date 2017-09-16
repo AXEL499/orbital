@@ -50,7 +50,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
         //textures/materials
         var material3 = new BABYLON.StandardMaterial("material3", scene);
-        material3.diffuseTexture = new BABYLON.Texture("https://s26.postimg.org/ubcduf3rt/Earth.jpg", scene);
+        material3.diffuseTexture = new BABYLON.Texture("Earth.jpg", scene);
 
         //ship/planet/texturing
         var planet = BABYLON.MeshBuilder.CreateSphere("Planet", { diameter: 2, diameterX: 2 }, scene);//diameter 2
@@ -79,16 +79,16 @@ window.addEventListener("DOMContentLoaded", function () {
         particleSystem.particleTexture = new BABYLON.Texture("square.png", scene);
         particleSystem.minEmitBox = new BABYLON.Vector3(-0.1, 0, 0); // Starting all From
         particleSystem.maxEmitBox = new BABYLON.Vector3(0.1, 0, 0); // To...
-        particleSystem.minSize = 0.02;
-        particleSystem.maxSize = 1.1;
+        particleSystem.minSize = 0.1;
+        particleSystem.maxSize = 0.3;
         particleSystem.emitRate = 50;
-        particleSystem.emitter = new BABYLON.Vector3(-10, 8, 0);
+        particleSystem.emitter = ship;
         particleSystem.direction1 = new BABYLON.Vector3(-0.1, -1, 0);
         particleSystem.direction2 = new BABYLON.Vector3(0.1, -1, 0);        
         particleSystem.color1 = new BABYLON.Color4(1, 0.3, 0, 1.0);
         particleSystem.color2 = new BABYLON.Color4(1, 1, 0, 0.5);
         particleSystem.minLifeTime = 0.3;
-        particleSystem.maxLifeTime = 10.5;
+        particleSystem.maxLifeTime = 2.0;
         particleSystem.minEmitPower = 1;
         particleSystem.maxEmitPower = 3;
         particleSystem.updateSpeed = 0.05;
@@ -120,7 +120,7 @@ window.addEventListener("DOMContentLoaded", function () {
         var ring = BABYLON.MeshBuilder.CreatePlane("ring", { width: 5, height: 5 }, scene);
 
         ringMaterial = new BABYLON.StandardMaterial("ringMaterial", scene);
-        ringMaterial.diffuseTexture = new BABYLON.Texture("https://s26.postimg.org/bt81a6lzt/Ring.png", scene);
+        ringMaterial.diffuseTexture = new BABYLON.Texture("Ring.png", scene);
         ringMaterial.diffuseTexture.hasAlpha = true;//Have an alpha
         ringMaterial.diffuseColor = new BABYLON.Color3(1, 0, 0);
         ring.material = ringMaterial;
@@ -148,17 +148,10 @@ window.addEventListener("DOMContentLoaded", function () {
     var timeLeftText = new BABYLON.GUI.TextBlock();
     timeLeftText.text = "memes";
     timeLeftText.color = "white";
-    timeLeftText.fontSize = 24;
-    timeLeftText.left = 850;
-    timeLeftText.top = -400
+    timeLeftText.fontSize = 32;
+    timeLeftText.left = 0;
+    timeLeftText.top = 430;
     advancedTexture.addControl(timeLeftText);   
-
-    var fuelLeft = new BABYLON.GUI.TextBlock();
-    fuelLeft.color = "white";
-    fuelLeft.fontSize = 24;
-    fuelLeft.left = 850;
-    fuelLeft.top = -450
-    advancedTexture.addControl(fuelLeft);   
 
     var ringTimerText = new BABYLON.GUI.TextBlock();
     ringTimerText.color = "white";
@@ -170,17 +163,24 @@ window.addEventListener("DOMContentLoaded", function () {
     var fuelHighScoreText = new BABYLON.GUI.TextBlock();
     fuelHighScoreText.color = "white";
     fuelHighScoreText.fontSize = 24;
-    fuelHighScoreText.left = 650;
+    fuelHighScoreText.left = 820;
     fuelHighScoreText.top = -450;
     advancedTexture.addControl(fuelHighScoreText);  
 
     var timeHighScoreText = new BABYLON.GUI.TextBlock();
     timeHighScoreText.color = "white";
     timeHighScoreText.fontSize = 24;
-    timeHighScoreText.left = 650;
+    timeHighScoreText.left = 820;
     timeHighScoreText.top = -400;
     advancedTexture.addControl(timeHighScoreText);  
 
+    var fuelLine = new BABYLON.GUI.Line();
+    fuelLine.x1 = 475;
+    fuelLine.y1 = 950;
+    fuelLine.y2 = 950;
+    fuelLine.lineWidth = 20;
+    fuelLine.color = "green";
+    advancedTexture.addControl(fuelLine);  
 
     var map = {}; //object for multiple key presses
 
@@ -204,6 +204,7 @@ window.addEventListener("DOMContentLoaded", function () {
         var Light = scene.getLightByName("dirLight");
         var speedmodifier = 1;
 
+        var deltaTime = (engine.getDeltaTime() / 1000);
 
 
         //Light.intensity += 0.01;
@@ -211,28 +212,27 @@ window.addEventListener("DOMContentLoaded", function () {
             if(player.fuel > 0){
                 var newVec = ForwardBlock.absolutePosition.subtract(Ship.position);
                 player.velocity = player.velocity.add(newVec.multiplyByFloats(player.thrust, player.thrust, player.thrust));
-                player.fuel -= (player.thrust * 500);
+                player.fuel -= (player.thrust * 40000 * deltaTime);
                 if(!thruster.isPlaying){
                     thruster.play();     
-                    //particleSystem.start();               
+                    particleSystem.start();   
                 }
-                
             }
             else{
                 player.fuel = 0;
                 thruster.pause();
-                //particleSystem.stop();            
+                particleSystem.stop();            
             }
         }
         else{
             thruster.pause();
-            //particleSystem.stop();
+            particleSystem.stop();
         }
         if (map["a"]) {
-            Ship.rotation.z += 0.05;
+            Ship.rotation.z += (3 * deltaTime);
         }
         if (map["d"]) {
-            Ship.rotation.z -= 0.05;
+            Ship.rotation.z -= (3 * deltaTime);
         }
         if (map["Shift"]) {
             speedmodifier = 5;
@@ -243,52 +243,48 @@ window.addEventListener("DOMContentLoaded", function () {
 
         for (var i = 0; i < speedmodifier; ++i) {
             //ring timer based on speed modifier
-            ringTimer -= (engine.getDeltaTime() / 1000);    
+            ringTimer -= deltaTime;    
 
             //time ticks down faster if speeding up time
             if(!inRing){
-                timeLeft -= (engine.getDeltaTime() / 1000);                
+                timeLeft -= deltaTime;                
             }
 
             //player gravity to planet
             var distance = Planet.position.subtract(Ship.position);
             var rSquared = (distance.length() * distance.length());
-            var force = gravity / rSquared;
-            if (force > 1) {
-                force = 1;
-            }
+            force = (gravity / rSquared) * deltaTime * 60;
+            
             var gravForceVec = (BABYLON.Vector3.Normalize(distance)).multiplyByFloats(force, force, force);
             player.velocity.addInPlace(gravForceVec);
             //player gravity to moon
             distance = Moon.position.subtract(Ship.position);
             rSquared = (distance.length() * distance.length());
-            force = (gravity / rSquared) / 5;
-            if (force > 1) {
-                force = 1;
-            }
+            force = ((gravity / rSquared) / 5) * deltaTime * 60; // "/ 5" coz mass of moon
+
             gravForceVec = (BABYLON.Vector3.Normalize(distance)).multiplyByFloats(force, force, force);
             player.velocity.addInPlace(gravForceVec);
 
-            Ship.translate(BABYLON.Vector3.Normalize(player.velocity), player.velocity.length() * 0.01666666667 /*(engine.getDeltaTime() / 1000)*/, BABYLON.Space.WORLD);
+            Ship.translate(BABYLON.Vector3.Normalize(player.velocity), player.velocity.length() * deltaTime, BABYLON.Space.WORLD);
 
             //moon gravity calculations
             distance = Planet.position.subtract(Moon.position);
             rSquared = (distance.length() * distance.length());
-            force = gravity / rSquared;
+            force = (gravity / rSquared) * deltaTime * 60;
             gravForceVec = (BABYLON.Vector3.Normalize(distance)).multiplyByFloats(force, force, force);
 
             moonVelocity.addInPlace(gravForceVec);
 
-            Moon.translate(BABYLON.Vector3.Normalize(moonVelocity), moonVelocity.length() * 0.01666666667 /*(engine.getDeltaTime() / 1000)*/, BABYLON.Space.WORLD);
+            Moon.translate(BABYLON.Vector3.Normalize(moonVelocity), moonVelocity.length() * deltaTime , BABYLON.Space.WORLD);
 
-            Planet.rotate(BABYLON.Axis.Z, 0.04, BABYLON.Space.WORLD);
-            Moon.rotate(BABYLON.Axis.Z, 0.0041, BABYLON.Space.WORLD);
+            Planet.rotate(BABYLON.Axis.Z, (0.04 * deltaTime * 60), BABYLON.Space.WORLD) ;
+            Moon.rotate(BABYLON.Axis.Z, (0.0041 * deltaTime * 60), BABYLON.Space.WORLD);
 
         }
 
-        fuelLeft.text = String("Fuel: " + player.fuel.toFixed(2));
         timeLeftText.text = String("Time left: " + timeLeft.toFixed(2));
-
+        fuelLine.x2 = 475 + (player.fuel / 1);            
+        
         //deathcheck
         var screenWidth = 25.5;
         var screenHeight = 13;
@@ -305,23 +301,22 @@ window.addEventListener("DOMContentLoaded", function () {
             thruster.stop();
 
 
+            var newFuelScore = (player.fuel / 1000) * 100;
             if(ringTimer <= -10){
-                if(fuelHighScore < player.fuel.toFixed(2)){
-                    fuelHighScore = player.fuel.toFixed(2);
-                    fuelHighScoreText.text = String("Best: " + fuelHighScore);
+                if(fuelHighScore < newFuelScore.toFixed(2)){
+                    fuelHighScore = newFuelScore.toFixed(2);
+                    fuelHighScoreText.text = String("Most fuel left: " + fuelHighScore + "%");
                 }
                 if(timeHighScore < timeLeft.toFixed(2)){
                     timeHighScore = timeLeft.toFixed(2);
-                    timeHighScoreText.text = String("Best: " + timeHighScore);
+                    timeHighScoreText.text = String("Most time left: " + timeHighScore);
                 }
-                
-                
             }
             player.fuel = 1000;
             timeLeft = 60;
             ringTimer = 10;
-            
         }
+
         if(distance.length() <= 2.5){
             inRing = true;
 
