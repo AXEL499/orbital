@@ -135,8 +135,6 @@ window.addEventListener("DOMContentLoaded", function () {
         scene.actionManager = new BABYLON.ActionManager(scene);
 
         advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
-        
-
         return scene;
     }
 
