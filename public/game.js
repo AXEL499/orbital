@@ -6,13 +6,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
     var engine = new BABYLON.Engine(canvas, true);
 
-    var advancedTexture;
-
-    var player = {
-        velocity: new BABYLON.Vector3(0, -2.451, 0),
-        thrust: 0.005,
-        fuel: 1000
-    };
+    var player = new Player();
 
     var moonVelocity = new BABYLON.Vector3(0, 2.451, 0);
 
@@ -31,11 +25,11 @@ window.addEventListener("DOMContentLoaded", function () {
     var thruster;
     
     var particleSystem;
+    var advancedTexture;
 
     var createScene = function () {
         var scene = new BABYLON.Scene(engine);
         engine.enableOfflineSupport = false;
-        //scene.clearColor = new BABYLON.Color3(0.3, 0.8, 0.8);
         scene.clearColor = new BABYLON.Color3.Black;
 
         //music and effects
@@ -43,18 +37,13 @@ window.addEventListener("DOMContentLoaded", function () {
         //music.setVolume(0.5);
         thruster = new BABYLON.Sound("Thruster", "rocketMain.ogg", scene);
 
-        //starfield
-        // var plane = BABYLON.MeshBuilder.CreatePlane("plane", { width: 52, height: 29 }, scene);
-        // plane.material = new BABYLON.StandardMaterial("planeMaterial", scene);
-        // plane.material.diffuseTexture = new BABYLON.Texture("http://i.imgur.com/vDhYRDs.jpg", scene);
-
         //textures/materials
-        var material3 = new BABYLON.StandardMaterial("material3", scene);
-        material3.diffuseTexture = new BABYLON.Texture("Earth.jpg", scene);
+        var earthMat = new BABYLON.StandardMaterial("material3", scene);
+        earthMat.diffuseTexture = new BABYLON.Texture("Earth.jpg", scene);
 
-        //ship/planet/texturing
+        //planet/texturing
         var planet = BABYLON.MeshBuilder.CreateSphere("Planet", { diameter: 2, diameterX: 2 }, scene);//diameter 2
-        planet.material = material3;
+        planet.material = earthMat;
         planet.position = new BABYLON.Vector3.Zero();
         planet.rotation = new BABYLON.Vector3(BABYLON.Tools.ToRadians(270), BABYLON.Tools.ToRadians(180), 0);
 
@@ -74,26 +63,7 @@ window.addEventListener("DOMContentLoaded", function () {
             });
         });
 
-        //particles
-        particleSystem = new BABYLON.ParticleSystem("particles", 100, scene);
-        particleSystem.particleTexture = new BABYLON.Texture("square.png", scene);
-        particleSystem.minEmitBox = new BABYLON.Vector3(-0.1, 0, 0); // Starting all From
-        particleSystem.maxEmitBox = new BABYLON.Vector3(0.1, 0, 0); // To...
-        particleSystem.minSize = 0.1;
-        particleSystem.maxSize = 0.3;
-        particleSystem.emitRate = 50;
-        particleSystem.emitter = ship;
-        particleSystem.direction1 = new BABYLON.Vector3(-0.1, -1, 0);
-        particleSystem.direction2 = new BABYLON.Vector3(0.1, -1, 0);        
-        particleSystem.color1 = new BABYLON.Color4(1, 0.3, 0, 1.0);
-        particleSystem.color2 = new BABYLON.Color4(1, 1, 0, 0.5);
-        particleSystem.minLifeTime = 0.3;
-        particleSystem.maxLifeTime = 2.0;
-        particleSystem.minEmitPower = 1;
-        particleSystem.maxEmitPower = 3;
-        particleSystem.updateSpeed = 0.05;
-        particleSystem.blendMode = BABYLON.ParticleSystem.BLENDMODE_ONEONE;
-        particleSystem.start();
+        particleSystem = new MyParticles(scene, ship);
 
         //moon dummy
         var moon = new BABYLON.Mesh("Moon", scene);
@@ -140,37 +110,14 @@ window.addEventListener("DOMContentLoaded", function () {
 
     var scene = createScene();
 
-    
-    
 
-    var timeLeftText = new BABYLON.GUI.TextBlock();
-    timeLeftText.text = "memes";
-    timeLeftText.color = "white";
-    timeLeftText.fontSize = 32;
-    timeLeftText.left = 0;
-    timeLeftText.top = 430;
-    advancedTexture.addControl(timeLeftText);   
+    var timeLeftText = new MyTextBlock("", "white", 32, 0, 430, advancedTexture);
+   
+    var ringTimerText = new MyTextBlock("", "white", 60, 0, -100, advancedTexture);
 
-    var ringTimerText = new BABYLON.GUI.TextBlock();
-    ringTimerText.color = "white";
-    ringTimerText.fontSize = 60;
-    ringTimerText.left = 0;
-    ringTimerText.top = -100;
-    advancedTexture.addControl(ringTimerText);   
+    var fuelHighScoreText = new MyTextBlock("", "white", 24, 820, -450, advancedTexture);
 
-    var fuelHighScoreText = new BABYLON.GUI.TextBlock();
-    fuelHighScoreText.color = "white";
-    fuelHighScoreText.fontSize = 24;
-    fuelHighScoreText.left = 820;
-    fuelHighScoreText.top = -450;
-    advancedTexture.addControl(fuelHighScoreText);  
-
-    var timeHighScoreText = new BABYLON.GUI.TextBlock();
-    timeHighScoreText.color = "white";
-    timeHighScoreText.fontSize = 24;
-    timeHighScoreText.left = 820;
-    timeHighScoreText.top = -400;
-    advancedTexture.addControl(timeHighScoreText);  
+    var timeHighScoreText = new MyTextBlock("", "white", 24, 820, -400, advancedTexture);
 
     var fuelLine = new BABYLON.GUI.Line();
     fuelLine.x1 = 475;
@@ -204,39 +151,40 @@ window.addEventListener("DOMContentLoaded", function () {
 
         var deltaTime = (engine.getDeltaTime() / 1000);
 
-
-        //Light.intensity += 0.01;
-        if (map["w"]) {
-            if(player.fuel > 0){
-                var newVec = ForwardBlock.absolutePosition.subtract(Ship.position);
-                player.velocity = player.velocity.add(newVec.multiplyByFloats(player.thrust, player.thrust, player.thrust));
-                player.fuel -= (player.thrust * 40000 * deltaTime);
-                if(!thruster.isPlaying){
-                    thruster.play();     
-                    particleSystem.start();   
-                }
-            }
-            else{
-                player.fuel = 0;
-                thruster.pause();
-                particleSystem.stop();            
-            }
-        }
-        else{
-            thruster.pause();
-            particleSystem.stop();
-        }
-        if (map["a"]) {
-            Ship.rotation.z += (3 * deltaTime);
-        }
-        if (map["d"]) {
-            Ship.rotation.z -= (3 * deltaTime);
-        }
         if (map["Shift"]) {
             speedmodifier = 5;
         }
-        if (map[" "]) {
-            timeLeft = 0;
+        else
+        {
+            if (map["w"]) {
+                if(player.fuel > 0){
+                    var newVec = ForwardBlock.absolutePosition.subtract(Ship.position);
+                    player.velocity = player.velocity.add(newVec.multiplyByFloats(player.thrust, player.thrust, player.thrust));
+                    player.fuel -= (player.thrust * 40000 * deltaTime);
+                    if(!thruster.isPlaying){
+                        thruster.play();     
+                        particleSystem.start();   
+                    }
+                }
+                else{
+                    player.fuel = 0;
+                    thruster.pause();
+                    particleSystem.stop();            
+                }
+            }
+            else{
+                thruster.pause();
+                particleSystem.stop();
+            }
+            if (map["a"]) {
+                Ship.rotation.z += (3 * deltaTime);
+            }
+            if (map["d"]) {
+                Ship.rotation.z -= (3 * deltaTime);
+            }
+            if (map[" "]) {
+                timeLeft = 0;
+            }
         }
 
         for (var i = 0; i < speedmodifier; ++i) {
@@ -249,35 +197,23 @@ window.addEventListener("DOMContentLoaded", function () {
             }
 
             //player gravity to planet
-            var distance = Planet.position.subtract(Ship.position);
-            var rSquared = (distance.length() * distance.length());
-            force = (gravity / rSquared) * deltaTime * 60;
+            player.velocity.addInPlace(calcGravity(Ship.position, Planet.position, 1, gravity, deltaTime));
+
+            //player gravity to moon            
+            player.velocity.addInPlace(calcGravity(Ship.position, Moon.position, 0.2, gravity, deltaTime));
             
-            var gravForceVec = (BABYLON.Vector3.Normalize(distance)).multiplyByFloats(force, force, force);
-            player.velocity.addInPlace(gravForceVec);
-            //player gravity to moon
-            distance = Moon.position.subtract(Ship.position);
-            rSquared = (distance.length() * distance.length());
-            force = ((gravity / rSquared) / 5) * deltaTime * 60; // "/ 5" coz mass of moon
+            //moon gravity calculations
+            moonVelocity.addInPlace(calcGravity(Moon.position, Planet.position, 1, gravity, deltaTime));
 
-            gravForceVec = (BABYLON.Vector3.Normalize(distance)).multiplyByFloats(force, force, force);
-            player.velocity.addInPlace(gravForceVec);
-
+            //move ship based on velocity vector
             Ship.translate(BABYLON.Vector3.Normalize(player.velocity), player.velocity.length() * deltaTime, BABYLON.Space.WORLD);
 
-            //moon gravity calculations
-            distance = Planet.position.subtract(Moon.position);
-            rSquared = (distance.length() * distance.length());
-            force = (gravity / rSquared) * deltaTime * 60;
-            gravForceVec = (BABYLON.Vector3.Normalize(distance)).multiplyByFloats(force, force, force);
-
-            moonVelocity.addInPlace(gravForceVec);
-
+            //move moon based on velocity vector
             Moon.translate(BABYLON.Vector3.Normalize(moonVelocity), moonVelocity.length() * deltaTime , BABYLON.Space.WORLD);
 
+            //'tidal lock'
             Planet.rotate(BABYLON.Axis.Z, (0.04 * deltaTime * 60), BABYLON.Space.WORLD) ;
             Moon.rotate(BABYLON.Axis.Z, (0.0041 * deltaTime * 60), BABYLON.Space.WORLD);
-
         }
 
         timeLeftText.text = String("Time left: " + timeLeft.toFixed(2));
@@ -297,7 +233,6 @@ window.addEventListener("DOMContentLoaded", function () {
             thruster.pause();
             thruster.play();
             thruster.stop();
-
 
             var newFuelScore = (player.fuel / 1000) * 100;
             if(ringTimer <= -10){
